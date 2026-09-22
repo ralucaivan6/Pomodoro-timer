@@ -1,27 +1,20 @@
 
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ro">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
-
-  <meta name="theme-color" content="#f7efe3" />
-
-  <title>Compact Pomodoro</title>
+  <title>Pomodoro Timer</title>
 
   <style>
     :root {
-      --cream: #f7efe3;
-      --paper: #fffaf3;
-      --line: #e8dac8;
-      --ink: #43382f;
-      --muted: #8c7c6d;
-      --accent: #bc744e;
-      --break: #91a286;
+      --cream: #f5efe6;
+      --cream-light: #fffaf4;
+      --brown: #463a32;
+      --muted: #96877b;
+      --accent: #bd7d5b;
+      --border: #e5d5c6;
     }
 
     * {
@@ -30,448 +23,150 @@
 
     html,
     body {
-      min-width: 0;
-      min-height: 100%;
+      width: 100%;
+      height: 100%;
+      min-width: 200px;
+      min-height: 200px;
       margin: 0;
     }
 
     body {
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 10px;
-
-      background: var(--cream);
-      color: var(--ink);
-
-      font-family:
-        ui-rounded,
-        "SF Pro Rounded",
-        "Segoe UI",
-        system-ui,
-        sans-serif;
-
-      -webkit-font-smoothing: antialiased;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      overflow: hidden;
+      background: transparent;
+      color: var(--brown);
+      font-family: Arial, sans-serif;
     }
 
-    button {
-      font: inherit;
-    }
-
-    .timer {
-      width: min(100%, 360px);
-      min-height: 300px;
-      padding: 18px;
-
+    .pomodoro {
+      width: 100%;
+      height: 100%;
+      min-height: 200px;
+      max-height: 280px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-
-      background: rgba(255, 250, 243, 0.94);
-      border: 1px solid rgba(125, 96, 69, 0.13);
-      border-radius: 24px;
-
-      box-shadow: 0 12px 30px rgba(110, 76, 44, 0.1);
-    }
-
-    .top {
-      width: 100%;
-
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .title {
-      margin: 0;
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 4px;
-      padding: 3px;
-
-      background: #f3e8d9;
-      border-radius: 10px;
-    }
-
-    .tab {
-      min-height: 36px;
-      padding: 7px 10px;
-
-      border: 0;
-      border-radius: 8px;
-
-      background: transparent;
-      color: var(--muted);
-
-      font-size: 11px;
-      font-weight: 750;
-
-      cursor: pointer;
-    }
-
-    .tab.active {
-      background: var(--paper);
-      color: var(--accent);
-      box-shadow: 0 1px 5px rgba(92, 66, 44, 0.1);
-    }
-
-    .clock {
-      position: relative;
-
-      width: 160px;
-      aspect-ratio: 1;
-      margin: 8px 0;
-    }
-
-    svg {
-      display: block;
-      width: 100%;
-      height: 100%;
-
-      transform: rotate(-90deg);
-    }
-
-    circle {
-      fill: none;
-      stroke-width: 9;
-    }
-
-    .track {
-      stroke: var(--line);
-    }
-
-    .progress {
-      stroke: var(--accent);
-      stroke-linecap: round;
-
-      transition:
-        stroke-dashoffset 0.3s ease,
-        stroke 0.2s ease;
-    }
-
-    .display {
-      position: absolute;
-      inset: 0;
-
-      display: grid;
-      place-content: center;
-
+      justify-content: center;
+      padding: clamp(14px, 5vw, 24px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--cream);
       text-align: center;
     }
 
-    .time {
-      font-size: clamp(38px, 13vw, 48px);
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: -0.06em;
-      line-height: 1;
+    .modes {
+      display: flex;
+      gap: 6px;
+      margin-bottom: clamp(12px, 4vw, 18px);
     }
 
-    .status {
-      margin-top: 7px;
-
+    .mode {
+      min-height: 34px;
+      padding: 7px 12px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: transparent;
       color: var(--muted);
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .controls {
-      width: 100%;
-
-      display: grid;
-      grid-template-columns: 1fr 1.5fr;
-      gap: 8px;
-    }
-
-    .button {
-      min-height: 44px;
-
-      border: 1px solid var(--line);
-      border-radius: 12px;
-
-      font-size: 12px;
-      font-weight: 800;
-
+      font-size: clamp(11px, 3vw, 13px);
+      font-weight: 600;
       cursor: pointer;
     }
 
-    .secondary {
-      background: transparent;
-      color: var(--muted);
+    .mode.active {
+      border-color: var(--border);
+      background: var(--cream-light);
+      color: var(--brown);
     }
 
-    .primary {
-      background: var(--ink);
-      border-color: var(--ink);
-      color: var(--paper);
-
-      box-shadow: 0 5px 12px rgba(67, 56, 47, 0.14);
+    #time {
+      margin: 0 0 clamp(14px, 4vw, 20px);
+      font-size: clamp(48px, 22vw, 68px);
+      font-weight: 700;
+      letter-spacing: -4px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
     }
 
-    button:focus-visible {
-      outline: 3px solid rgba(188, 116, 78, 0.32);
-      outline-offset: 2px;
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button {
+      min-width: 76px;
+      min-height: 42px;
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--cream-light);
+      color: var(--brown);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition:
+        transform 0.15s ease,
+        opacity 0.15s ease;
+    }
+
+    button:hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
     }
 
     button:active {
-      transform: translateY(1px);
+      transform: translateY(0);
     }
 
-    @media (max-width: 300px) {
-      .timer {
-        min-height: 280px;
-        padding: 14px;
-        border-radius: 20px;
+    button:focus-visible {
+      outline: 3px solid rgba(189, 125, 91, 0.3);
+      outline-offset: 2px;
+    }
+
+    #start {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+
+    @media (max-width: 240px), (max-height: 220px) {
+      body {
+        padding: 5px;
       }
 
-      .top {
-        align-items: flex-start;
+      .pomodoro {
+        min-height: 190px;
+        padding: 10px;
+        border-radius: 16px;
       }
 
-      .title {
-        padding-top: 9px;
-        font-size: 12px;
+      .modes {
+        margin-bottom: 10px;
       }
 
-      .tab {
-        padding-inline: 8px;
+      .mode {
+        min-height: 30px;
+        padding: 5px 8px;
       }
 
-      .clock {
-        width: 145px;
+      #time {
+        margin-bottom: 12px;
+        font-size: 46px;
+      }
+
+      button {
+        min-width: 68px;
+        min-height: 38px;
+        padding: 7px 10px;
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        transition-duration: 0.01ms !important;
+      button {
+        transition: none;
       }
     }
-  </style>
-</head>
-
-<body>
-  <main class="timer" aria-label="Pomodoro timer">
-    <div class="top">
-      <h1 class="title">Pomodoro</h1>
-
-      <div class="tabs" aria-label="Timer mode">
-        <button
-          class="tab active"
-          type="button"
-          data-mode="focus"
-        >
-          Focus
-        </button>
-
-        <button
-          class="tab"
-          type="button"
-          data-mode="break"
-        >
-          Break
-        </button>
-      </div>
-    </div>
-
-    <div class="clock" aria-live="polite">
-      <svg viewBox="0 0 180 180" aria-hidden="true">
-        <circle
-          class="track"
-          cx="90"
-          cy="90"
-          r="76"
-        ></circle>
-
-        <circle
-          class="progress"
-          cx="90"
-          cy="90"
-          r="76"
-        ></circle>
-      </svg>
-
-      <div class="display">
-        <div class="time" id="time">25:00</div>
-        <div class="status" id="status">Ready</div>
-      </div>
-    </div>
-
-    <div class="controls">
-      <button
-        class="button secondary"
-        id="reset"
-        type="button"
-      >
-        Reset
-      </button>
-
-      <button
-        class="button primary"
-        id="start"
-        type="button"
-      >
-        Start
-      </button>
-    </div>
-  </main>
-
-  <script>
-    (() => {
-      const durations = {
-        focus: 25 * 60,
-        break: 5 * 60
-      };
-
-      const timeElement = document.getElementById("time");
-      const statusElement = document.getElementById("status");
-      const startButton = document.getElementById("start");
-      const resetButton = document.getElementById("reset");
-      const progress = document.querySelector(".progress");
-      const tabs = document.querySelectorAll(".tab");
-
-      const circumference = 2 * Math.PI * 76;
-
-      let mode = "focus";
-      let seconds = durations.focus;
-      let running = false;
-      let interval = null;
-
-      progress.style.strokeDasharray = circumference;
-
-      function render() {
-        const minutes = Math.floor(seconds / 60)
-          .toString()
-          .padStart(2, "0");
-
-        const remainingSeconds = (seconds % 60)
-          .toString()
-          .padStart(2, "0");
-
-        const ratio = seconds / durations[mode];
-
-        timeElement.textContent =
-          `${minutes}:${remainingSeconds}`;
-
-        statusElement.textContent = running
-          ? mode === "focus"
-            ? "Focusing"
-            : "Resting"
-          : "Ready";
-
-        startButton.textContent = running
-          ? "Pause"
-          : "Start";
-
-        progress.style.strokeDashoffset =
-          circumference * (1 - ratio);
-
-        progress.style.stroke =
-          mode === "focus"
-            ? "var(--accent)"
-            : "var(--break)";
-
-        document.title =
-          `${minutes}:${remainingSeconds} · Pomodoro`;
-
-        tabs.forEach((tab) => {
-          tab.classList.toggle(
-            "active",
-            tab.dataset.mode === mode
-          );
-        });
-      }
-
-      function stop() {
-        if (interval) {
-          clearInterval(interval);
-        }
-
-        interval = null;
-        running = false;
-      }
-
-      function setMode(nextMode) {
-        stop();
-
-        mode = nextMode;
-        seconds = durations[mode];
-
-        render();
-      }
-
-      function toggleTimer() {
-        running = !running;
-
-        if (running) {
-          interval = setInterval(() => {
-            if (seconds <= 1) {
-              stop();
-
-              mode =
-                mode === "focus"
-                  ? "break"
-                  : "focus";
-
-              seconds = durations[mode];
-
-              render();
-              return;
-            }
-
-            seconds -= 1;
-            render();
-          }, 1000);
-        } else {
-          clearInterval(interval);
-          interval = null;
-        }
-
-        render();
-      }
-
-      function resetTimer() {
-        stop();
-
-        seconds = durations[mode];
-
-        render();
-      }
-
-      tabs.forEach((tab) => {
-        tab.addEventListener("click", () => {
-          setMode(tab.dataset.mode);
-        });
-      });
-
-      startButton.addEventListener(
-        "click",
-        toggleTimer
-      );
-
-      resetButton.addEventListener(
-        "click",
-        resetTimer
-      );
-
-      document.addEventListener("keydown", (event) => {
-        if (event.code === "Space") {
-          event.preventDefault();
-          toggleTimer();
-        }
-      });
-
-      render();
-    })();
-  </script>
-</body>
-</html>
