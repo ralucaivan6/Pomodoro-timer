@@ -1,20 +1,20 @@
-
+ 
 <!DOCTYPE html>
 <html lang="ro">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pomodoro Timer</title>
 
   <style>
     :root {
-      --cream: #f5efe6;
-      --cream-light: #fffaf4;
-      --brown: #463a32;
-      --muted: #96877b;
-      --accent: #bd7d5b;
-      --border: #e5d5c6;
+      --cream: #f7f0e6;
+      --cream-dark: #eadcc9;
+      --brown: #5f5145;
+      --brown-light: #8b7969;
+      --accent: #b87555;
+      --white: rgba(255, 252, 247, 0.78);
+      --shadow: 0 12px 35px rgba(94, 76, 59, 0.14);
     }
 
     * {
@@ -25,8 +25,6 @@
     body {
       width: 100%;
       height: 100%;
-      min-width: 200px;
-      min-height: 200px;
       margin: 0;
     }
 
@@ -34,87 +32,84 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 8px;
       overflow: hidden;
       background: transparent;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
       color: var(--brown);
-      font-family: Arial, sans-serif;
     }
 
     .pomodoro {
       width: 100%;
       height: 100%;
-      min-height: 200px;
-      max-height: 280px;
+      min-height: 220px;
+      max-height: 380px;
+      padding: clamp(16px, 5vw, 28px);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: clamp(14px, 5vw, 24px);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: var(--cream);
+      gap: clamp(12px, 2.5vw, 20px);
+      border: 1px solid rgba(184, 117, 85, 0.15);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.55), transparent 36%),
+        var(--cream);
+      box-shadow: var(--shadow);
       text-align: center;
     }
 
-    .modes {
+    .header {
+      width: 100%;
       display: flex;
-      gap: 6px;
-      margin-bottom: clamp(12px, 4vw, 18px);
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
 
-    .mode {
-      min-height: 34px;
-      padding: 7px 12px;
-      border: 1px solid transparent;
-      border-radius: 10px;
-      background: transparent;
-      color: var(--muted);
-      font-size: clamp(11px, 3vw, 13px);
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .mode.active {
-      border-color: var(--border);
-      background: var(--cream-light);
+    .title {
+      margin: 0;
+      font-size: clamp(13px, 2vw, 16px);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       color: var(--brown);
     }
 
-    #time {
-      margin: 0 0 clamp(14px, 4vw, 20px);
-      font-size: clamp(48px, 22vw, 68px);
+    .cycle {
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(184, 117, 85, 0.1);
+      color: var(--accent);
+      font-size: 11px;
       font-weight: 700;
-      letter-spacing: -4px;
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
-    .controls {
+    .mode-switcher {
       display: flex;
-      justify-content: center;
-      gap: 8px;
+      gap: 6px;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgba(234, 220, 201, 0.72);
     }
 
     button {
-      min-width: 76px;
-      min-height: 42px;
-      padding: 9px 14px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--cream-light);
-      color: var(--brown);
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 700;
+      min-width: 44px;
+      min-height: 40px;
+      border: 0;
+      border-radius: 999px;
+      font: inherit;
       cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
       transition:
-        transform 0.15s ease,
-        opacity 0.15s ease;
+        transform 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease;
     }
 
     button:hover {
-      opacity: 0.88;
       transform: translateY(-1px);
     }
 
@@ -123,50 +118,407 @@
     }
 
     button:focus-visible {
-      outline: 3px solid rgba(189, 125, 91, 0.3);
-      outline-offset: 2px;
+      outline: 3px solid rgba(184, 117, 85, 0.35);
+      outline-offset: 3px;
     }
 
-    #start {
-      border-color: var(--accent);
+    .mode-button {
+      padding: 7px 12px;
+      background: transparent;
+      color: var(--brown-light);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .mode-button.active {
+      background: var(--white);
+      color: var(--accent);
+      box-shadow: 0 3px 10px rgba(94, 76, 59, 0.08);
+    }
+
+    .timer-ring {
+      --progress: 100%;
+      position: relative;
+      width: clamp(132px, 33vw, 190px);
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, var(--cream) 65%, transparent 66%),
+        conic-gradient(
+          var(--accent) var(--progress),
+          rgba(184, 117, 85, 0.16) 0
+        );
+      box-shadow:
+        0 0 0 8px rgba(255, 252, 247, 0.45),
+        0 8px 22px rgba(94, 76, 59, 0.1);
+    }
+
+    .timer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .time {
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(34px, 8vw, 58px);
+      line-height: 1;
+      letter-spacing: -0.06em;
+      font-weight: 700;
+      color: var(--brown);
+    }
+
+    .status {
+      min-height: 18px;
+      margin-top: 8px;
+      color: var(--brown-light);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .control-button {
+      padding: 9px 15px;
+      background: rgba(255, 252, 247, 0.8);
+      color: var(--brown);
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 3px 10px rgba(94, 76, 59, 0.08);
+    }
+
+    .control-button.primary {
+      min-width: 92px;
       background: var(--accent);
-      color: white;
+      color: #fffaf5;
+      box-shadow: 0 5px 14px rgba(184, 117, 85, 0.25);
     }
 
-    @media (max-width: 240px), (max-height: 220px) {
-      body {
-        padding: 5px;
-      }
+    .control-button.icon {
+      width: 42px;
+      padding: 9px 0;
+      font-size: 16px;
+    }
 
+    .presets {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .preset {
+      padding: 5px 8px;
+      background: transparent;
+      color: var(--brown-light);
+      font-size: 10px;
+    }
+
+    .preset.active {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    @media (max-width: 360px) {
       .pomodoro {
-        min-height: 190px;
-        padding: 10px;
-        border-radius: 16px;
+        min-height: 205px;
+        padding: 14px;
+        gap: 10px;
+        border-radius: 18px;
       }
 
-      .modes {
-        margin-bottom: 10px;
+      .timer-ring {
+        width: 125px;
       }
 
-      .mode {
-        min-height: 30px;
-        padding: 5px 8px;
-      }
-
-      #time {
-        margin-bottom: 12px;
-        font-size: 46px;
-      }
-
-      button {
-        min-width: 68px;
-        min-height: 38px;
-        padding: 7px 10px;
+      .control-button {
+        padding: 8px 11px;
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      button {
-        transition: none;
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
       }
     }
+  </style>
+</head>
+
+<body>
+  <main class="pomodoro" aria-label="Pomodoro timer">
+    <div class="header">
+      <h1 class="title">Pomodoro</h1>
+      <span class="cycle" id="cycleLabel">Ciclul 1 / 4</span>
+    </div>
+
+    <div class="mode-switcher" role="group" aria-label="Alege modul timerului">
+      <button class="mode-button active" data-mode="work">Focus</button>
+      <button class="mode-button" data-mode="short">Pauză</button>
+      <button class="mode-button" data-mode="long">Pauză lungă</button>
+    </div>
+
+    <div class="timer-ring" id="timerRing">
+      <div class="timer-content">
+        <div class="time" id="time" aria-live="polite">25:00</div>
+        <div class="status" id="status">Gata de început</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="control-button icon" id="resetButton" aria-label="Resetează timerul">
+        ↺
+      </button>
+
+      <button class="control-button primary" id="startButton">
+        Start
+      </button>
+
+      <button class="control-button icon" id="skipButton" aria-label="Sari peste sesiune">
+        →
+      </button>
+    </div>
+
+    <div class="presets" aria-label="Presetări">
+      <button class="preset active" data-preset="25">25 / 5</button>
+      <button class="preset" data-preset="50">50 / 10</button>
+    </div>
+  </main>
+
+  <script>
+    const timeElement = document.getElementById("time");
+    const statusElement = document.getElementById("status");
+    const cycleLabel = document.getElementById("cycleLabel");
+    const timerRing = document.getElementById("timerRing");
+    const startButton = document.getElementById("startButton");
+    const resetButton = document.getElementById("resetButton");
+    const skipButton = document.getElementById("skipButton");
+
+    const modeButtons = document.querySelectorAll(".mode-button");
+    const presetButtons = document.querySelectorAll(".preset");
+
+    let preset = 25;
+    let mode = "work";
+    let cycle = 1;
+    let remainingSeconds = preset * 60;
+    let totalSeconds = preset * 60;
+    let timer = null;
+    let isRunning = false;
+
+    const modeNames = {
+      work: "Focus",
+      short: "Pauză scurtă",
+      long: "Pauză lungă"
+    };
+
+    function getDuration(currentMode) {
+      if (currentMode === "work") return preset * 60;
+      if (currentMode === "short") return (preset === 50 ? 10 : 5) * 60;
+      return 15 * 60;
+    }
+
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+
+      return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+
+    function updateDisplay() {
+      timeElement.textContent = formatTime(remainingSeconds);
+
+      const progress =
+        ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
+
+      timerRing.style.setProperty("--progress", `${progress}%`);
+
+      cycleLabel.textContent = `Ciclul ${cycle} / 4`;
+      document.title = `${formatTime(remainingSeconds)} · Pomodoro`;
+
+      if (!isRunning) {
+        statusElement.textContent =
+          remainingSeconds === totalSeconds
+            ? "Gata de început"
+            : "Pauză";
+      }
+    }
+
+    function setMode(newMode) {
+      mode = newMode;
+      totalSeconds = getDuration(mode);
+      remainingSeconds = totalSeconds;
+
+      modeButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.mode === mode);
+      });
+
+      statusElement.textContent =
+        mode === "work" ? "Gata de început" : modeNames[mode];
+
+      updateDisplay();
+    }
+
+    function setPreset(newPreset) {
+      preset = Number(newPreset);
+
+      presetButtons.forEach((button) => {
+        button.classList.toggle(
+          "active",
+          Number(button.dataset.preset) === preset
+        );
+      });
+
+      setMode("work");
+    }
+
+    function startTimer() {
+      if (isRunning) return;
+
+      isRunning = true;
+      startButton.textContent = "Pauză";
+      statusElement.textContent = modeNames[mode];
+
+      timer = setInterval(() => {
+        remainingSeconds -= 1;
+
+        if (remainingSeconds <= 0) {
+          clearInterval(timer);
+          timer = null;
+          isRunning = false;
+          playSound();
+          completeSession();
+        }
+
+        updateDisplay();
+      }, 1000);
+
+      updateDisplay();
+    }
+
+    function pauseTimer() {
+      clearInterval(timer);
+      timer = null;
+      isRunning = false;
+      startButton.textContent = "Continuă";
+      statusElement.textContent = "Pe pauză";
+      updateDisplay();
+    }
+
+    function resetTimer() {
+      clearInterval(timer);
+      timer = null;
+      isRunning = false;
+      startButton.textContent = "Start";
+      totalSeconds = getDuration(mode);
+      remainingSeconds = totalSeconds;
+      statusElement.textContent = "Gata de început";
+      updateDisplay();
+    }
+
+    function completeSession() {
+      startButton.textContent = "Start";
+
+      if (mode === "work") {
+        if (cycle >= 4) {
+          cycle = 1;
+          setMode("long");
+        } else {
+          setMode("short");
+        }
+      } else {
+        if (mode === "long") {
+          cycle = 1;
+        } else {
+          cycle += 1;
+        }
+
+        setMode("work");
+      }
+
+      statusElement.textContent = `${modeNames[mode]} · gata`;
+      updateDisplay();
+    }
+
+    function skipSession() {
+      clearInterval(timer);
+      timer = null;
+      isRunning = false;
+      completeSession();
+    }
+
+    function playSound() {
+      try {
+        const AudioContext =
+          window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioContext) return;
+
+        const context = new AudioContext();
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+
+        oscillator.type = "sine";
+        oscillator.frequency.value = 660;
+        gain.gain.setValueAtTime(0.0001, context.currentTime);
+        gain.gain.exponentialRampToValueAtTime(
+          0.18,
+          context.currentTime + 0.03
+        );
+        gain.gain.exponentialRampToValueAtTime(
+          0.0001,
+          context.currentTime + 0.7
+        );
+
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start();
+        oscillator.stop(context.currentTime + 0.7);
+      } catch (error) {
+        // Sunetul este opțional și poate fi blocat de browser.
+      }
+    }
+
+    startButton.addEventListener("click", () => {
+      if (isRunning) {
+        pauseTimer();
+      } else {
+        startTimer();
+      }
+    });
+
+    resetButton.addEventListener("click", resetTimer);
+    skipButton.addEventListener("click", skipSession);
+
+    modeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        clearInterval(timer);
+        timer = null;
+        isRunning = false;
+        startButton.textContent = "Start";
+        setMode(button.dataset.mode);
+      });
+    });
+
+    presetButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        clearInterval(timer);
+        timer = null;
+        isRunning = false;
+        startButton.textContent = "Start";
+        setPreset(button.dataset.preset);
+      });
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>
