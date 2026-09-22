@@ -2,245 +2,192 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pomodoro Timer</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+  <meta name="theme-color" content="#f8f0e3" />
+
+  <title>Cream Pomodoro</title>
 
   <style>
+    :root {
+      --cream: #f8f0e3;
+      --cream-light: #fffaf2;
+      --cream-dark: #f1e5d2;
+      --paper: rgba(255, 253, 248, 0.82);
+
+      --text: #3d342d;
+      --muted: #85786c;
+      --border: rgba(103, 79, 58, 0.16);
+
+      --accent: #bd744c;
+      --accent-dark: #8c5136;
+      --break: #93a689;
+
+      --shadow:
+        0 18px 45px rgba(121, 83, 48, 0.12),
+        0 2px 7px rgba(121, 83, 48, 0.07);
+    }
+
     * {
       box-sizing: border-box;
     }
 
+    html,
     body {
+      min-width: 0;
+      min-height: 100%;
       margin: 0;
-      min-width: 180px;
-      background: transparent;
-      color: #2c2c2b;
-      font-family: Arial, sans-serif;
     }
 
-    .pomodoro {
-      width: min(100%, 220px);
-      margin: 0 auto;
-      padding: 12px;
-      background: #fff;
-      border: 1px solid #e6e5e3;
-      border-radius: 12px;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      font-size: 12px;
-    }
-
-    .title {
-      font-weight: 700;
-    }
-
-    #mode {
-      color: #7d7a75;
-    }
-
-    #time {
-      margin-bottom: 8px;
-      text-align: center;
-      font-size: 40px;
-      font-weight: 700;
-      line-height: 1;
-      letter-spacing: -2px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .progress {
-      height: 5px;
-      margin-bottom: 10px;
-      overflow: hidden;
-      background: #e5f2fc;
-      border-radius: 10px;
-    }
-
-    #progressBar {
-      width: 100%;
-      height: 100%;
-      background: #2783de;
-      transform-origin: left;
-    }
-
-    .buttons {
+    body {
+      min-height: 100vh;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      place-items: center;
+      padding: clamp(12px, 2.5vw, 28px);
+
+      color: var(--text);
+      background:
+        radial-gradient(
+          circle at 8% 8%,
+          rgba(255, 255, 255, 0.75),
+          transparent 32%
+        ),
+        radial-gradient(
+          circle at 96% 92%,
+          rgba(225, 196, 159, 0.25),
+          transparent 34%
+        ),
+        var(--cream);
+
+      font-family:
+        ui-rounded,
+        "SF Pro Rounded",
+        "Segoe UI",
+        system-ui,
+        -apple-system,
+        sans-serif;
+
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    input {
+      font: inherit;
     }
 
     button {
-      min-height: 40px;
-      border: 1px solid #e6e5e3;
-      border-radius: 8px;
-      background: #f9f8f7;
-      color: #2c2c2b;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    button:hover {
-      border-color: #2783de;
+    .app {
+      width: min(100%, 760px);
+      min-height: 400px;
+
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(230px, 0.95fr);
+      gap: clamp(18px, 4vw, 36px);
+
+      padding: clamp(20px, 4vw, 38px);
+
+      background: var(--paper);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow: hidden;
     }
 
-    #startButton {
-      border-color: #2783de;
-      background: #2783de;
-      color: white;
-    }
-
-    .footer {
+    .main {
+      min-width: 0;
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
-      margin-top: 9px;
-      color: #7d7a75;
-      font-size: 11px;
     }
 
-    @media (prefers-color-scheme: dark) {
-      body {
-        color: white;
-      }
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 9px;
 
-      .pomodoro {
-        background: #202020;
-        border-color: rgba(255, 255, 255, 0.2);
-      }
+      margin: 0 0 8px;
 
-      button {
-        background: #2a2a29;
-        color: white;
-        border-color: rgba(255, 255, 255, 0.2);
-      }
-
-      #mode,
-      .footer {
-        color: rgba(255, 255, 255, 0.65);
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <main class="pomodoro">
-    <div class="header">
-      <span class="title">Pomodoro</span>
-      <span id="mode">Focus</span>
-    </div>
-
-    <div id="time">25:00</div>
-
-    <div class="progress">
-      <div id="progressBar"></div>
-    </div>
-
-    <div class="buttons">
-      <button id="startButton" type="button">Start</button>
-      <button id="resetButton" type="button">Reset</button>
-    </div>
-
-    <div class="footer">
-      <span id="session">Session 1</span>
-      <span>25 / 5 min</span>
-    </div>
-  </main>
-
-  <script>
-    const FOCUS_TIME = 25 * 60;
-    const BREAK_TIME = 5 * 60;
-
-    let remainingTime = FOCUS_TIME;
-    let totalTime = FOCUS_TIME;
-    let sessionNumber = 1;
-    let breakMode = false;
-    let running = false;
-    let timer = null;
-
-    const timeDisplay = document.getElementById("time");
-    const modeDisplay = document.getElementById("mode");
-    const sessionDisplay = document.getElementById("session");
-    const progressBar = document.getElementById("progressBar");
-    const startButton = document.getElementById("startButton");
-    const resetButton = document.getElementById("resetButton");
-
-    function updateDisplay() {
-      const minutes = Math.floor(remainingTime / 60);
-      const seconds = remainingTime % 60;
-
-      timeDisplay.textContent =
-        String(minutes).padStart(2, "0") +
-        ":" +
-        String(seconds).padStart(2, "0");
-
-      modeDisplay.textContent = breakMode ? "Break" : "Focus";
-      sessionDisplay.textContent = `Session ${sessionNumber}`;
-      startButton.textContent = running ? "Pause" : "Start";
-
-      const progress = remainingTime / totalTime;
-      progressBar.style.transform = `scaleX(${progress})`;
-
-      document.title = `${timeDisplay.textContent} · Pomodoro`;
+      color: var(--accent-dark);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
     }
 
-    function changeMode() {
-      breakMode = !breakMode;
-      totalTime = breakMode ? BREAK_TIME : FOCUS_TIME;
-      remainingTime = totalTime;
-
-      if (!breakMode) {
-        sessionNumber++;
-      }
-
-      updateDisplay();
+    .eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 2px;
+      border-radius: 20px;
+      background: var(--accent);
     }
 
-    function tick() {
-      if (remainingTime > 0) {
-        remainingTime--;
-        updateDisplay();
-      } else {
-        changeMode();
-      }
+    h1 {
+      margin: 0;
+      font-size: clamp(25px, 4vw, 39px);
+      line-height: 1.03;
+      letter-spacing: -0.045em;
     }
 
-    function startTimer() {
-      running = true;
-      timer = setInterval(tick, 1000);
-      updateDisplay();
+    .subtitle {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
     }
 
-    function pauseTimer() {
-      running = false;
-      clearInterval(timer);
-      timer = null;
-      updateDisplay();
+    .mode-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin: 24px 0 16px;
     }
 
-    startButton.addEventListener("click", () => {
-      if (running) {
-        pauseTimer();
-      } else {
-        startTimer();
-      }
-    });
+    .mode-tab,
+    .button,
+    .save-button {
+      min-height: 44px;
+      border: 1px solid transparent;
+      border-radius: 13px;
+      cursor: pointer;
 
-    resetButton.addEventListener("click", () => {
-      pauseTimer();
+      transition:
+        transform 0.18s ease,
+        background 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        box-shadow 0.18s ease;
+    }
 
-      breakMode = false;
-      sessionNumber = 1;
-      totalTime = FOCUS_TIME;
-      remainingTime = FOCUS_TIME;
+    .mode-tab {
+      padding: 9px 13px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.52);
+      border-color: var(--border);
+      font-size: 12px;
+      font-weight: 750;
+    }
 
-      updateDisplay();
-    });
+    .mode-tab:hover,
+    .mode-tab:focus-visible {
+      color: var(--accent-dark);
+      border-color: rgba(184, 113, 76, 0.42);
+    }
 
-    updateDisplay();
-  </script>
-</body>
-</html>
+    .mode-tab.active {
+      color: white;
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 5px 13px rgba(184, 113, 76, 0.22);
+    }
+
+    button:focus-visible,
+    input:focus-visible {
+      outline: 3px solid rgba(184, 113, 76, 0.36);
+      outline-offset:
