@@ -257,24 +257,24 @@
   <main class="pomodoro" aria-label="Pomodoro timer">
     <div class="header">
       <h1 class="title">Pomodoro</h1>
-      <span class="cycle" id="cycleLabel">Ciclul 1 / 4</span>
+      <span class="cycle" id="cycleLabel">Cycle 1 / 4</span>
     </div>
 
-    <div class="mode-switcher" role="group" aria-label="Alege modul timerului">
+    <div class="mode-switcher" role="group" aria-label="choose timer mode">
       <button class="mode-button active" data-mode="work">Focus</button>
-      <button class="mode-button" data-mode="short">Pauză</button>
-      <button class="mode-button" data-mode="long">Pauză lungă</button>
+      <button class="mode-button" data-mode="short">Break</button>
+      <button class="mode-button" data-mode="long">Long Break</button>
     </div>
 
     <div class="timer-ring" id="timerRing">
       <div class="timer-content">
         <div class="time" id="time" aria-live="polite">25:00</div>
-        <div class="status" id="status">Gata de început</div>
+        <div class="status" id="status">Ready to start</div>
       </div>
     </div>
 
     <div class="controls">
-      <button class="control-button icon" id="resetButton" aria-label="Resetează timerul">
+      <button class="control-button icon" id="resetButton" aria-label="Reset timer">
         ↺
       </button>
 
@@ -282,12 +282,12 @@
         Start
       </button>
 
-      <button class="control-button icon" id="skipButton" aria-label="Sari peste sesiune">
+      <button class="control-button icon" id="skipButton" aria-label="Skip the session">
         →
       </button>
     </div>
 
-    <div class="presets" aria-label="Presetări">
+    <div class="presets" aria-label="Presets">
       <button class="preset active" data-preset="25">25 / 5</button>
       <button class="preset" data-preset="50">50 / 10</button>
     </div>
@@ -315,8 +315,8 @@
 
     const modeNames = {
       work: "Focus",
-      short: "Pauză scurtă",
-      long: "Pauză lungă"
+      short: "Short break",
+      long: "Long break"
     };
 
     function getDuration(currentMode) {
@@ -340,14 +340,14 @@
 
       timerRing.style.setProperty("--progress", `${progress}%`);
 
-      cycleLabel.textContent = `Ciclul ${cycle} / 4`;
+      cycleLabel.textContent = `cycle ${cycle} / 4`;
       document.title = `${formatTime(remainingSeconds)} · Pomodoro`;
 
       if (!isRunning) {
         statusElement.textContent =
           remainingSeconds === totalSeconds
-            ? "Gata de început"
-            : "Pauză";
+            ? "Ready to start"
+            : "Break";
       }
     }
 
@@ -361,7 +361,7 @@
       });
 
       statusElement.textContent =
-        mode === "work" ? "Gata de început" : modeNames[mode];
+        mode === "work" ? "Ready to start" : modeNames[mode];
 
       updateDisplay();
     }
@@ -383,7 +383,7 @@
       if (isRunning) return;
 
       isRunning = true;
-      startButton.textContent = "Pauză";
+      startButton.textContent = "Break";
       statusElement.textContent = modeNames[mode];
 
       timer = setInterval(() => {
@@ -407,8 +407,8 @@
       clearInterval(timer);
       timer = null;
       isRunning = false;
-      startButton.textContent = "Continuă";
-      statusElement.textContent = "Pe pauză";
+      startButton.tbutton.dataset.pr="continue";
+      statusElement.textContent = "on break";
       updateDisplay();
     }
 
@@ -419,7 +419,7 @@
       startButton.textContent = "Start";
       totalSeconds = getDuration(mode);
       remainingSeconds = totalSeconds;
-      statusElement.textContent = "Gata de început";
+      statusElement.textContent = "Ready to start";
       updateDisplay();
     }
 
@@ -443,7 +443,7 @@
         setMode("work");
       }
 
-      statusElement.textContent = `${modeNames[mode]} · gata`;
+      statusElement.textContent = `${modeNames[mode]} · ready`;
       updateDisplay();
     }
 
