@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f2ede3">
+  <title>Pomodoro — Soft Focus</title>
+
+  <style>
+    :root {
+      --background: #f2ede3;
+      --card: #fbf8f2;
+      --surface: #fffdf9;
+      --text: #35312c;
+      --muted: #8f877c;
+      --border: #e7ded1;
+      --track: #e8dfd2;
+      --accent: #a66e4f;
+      --accent-dark: #83533b;
+      --accent-soft: #f0d9c9;
+      --green: #8b9a80;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.78), transparent 28%),
+        radial-gradient(circle at 88% 86%, rgba(219, 195, 170, 0.28), transparent 25%),
+        var(--background);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .page {
+      display: grid;
+      place-items: center;
+      width: min(100%, 430px);
+      min-height: 100svh;
+      margin: 0 auto;
+      padding:
+        max(22px, env(safe-area-inset-top))
+        18px
+        max(22px, env(safe-area-inset-bottom));
+    }
+
+    .timer-card {
+      width: 100%;
+      max-width: 390px;
+      padding: clamp(22px, 5vw, 32px);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 30px;
+      background: rgba(251, 248, 242, 0.9);
+      box-shadow:
+        0 24px 70px rgba(89, 65, 44, 0.13),
+        0 3px 10px rgba(89, 65, 44, 0.06);
+      backdrop-filter: blur(16px);
+    }
+
+    .header,
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header {
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+    }
+
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+
+    .date {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .modes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      margin-bottom: 22px;
+      padding: 4px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: rgba(255, 253, 249, 0.65);
+    }
+
+    .mode {
+      min-height: 42px;
+      padding: 5px;
+      border: 0;
+      border-radius: 11px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .mode:hover {
+      color: var(--text);
+    }
+
+    .mode[aria-selected="true"] {
+      background: var(--surface);
+      color: var(--accent-dark);
+      box-shadow: 0 2px 8px rgba(106, 74, 52, 0.08);
+    }
+
+    .mode:focus-visible,
+    .button:focus-visible {
+      outline: 3px solid rgba(166, 110, 79, 0.3);
+      outline-offset: 2px;
+    }
+
+    .clock-container {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: min(76vw, 292px);
+      aspect-ratio: 1;
+      margin: 0 auto 22px;
+    }
+
+    .clock-container::after {
+      position: absolute;
+      inset: 13%;
+      border: 1px solid rgba(166, 110, 79, 0.11);
+      border-radius: 50%;
+      content: "";
+      pointer-events: none;
+    }
+
+    .progress-ring {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .progress-track,
+    .progress-value {
+      fill: none;
+      stroke-width: 8;
+    }
+
+    .progress-track {
+      stroke: var(--track);
+    }
+
+    .progress-value {
+      stroke: var(--accent);
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s linear;
+    }
+
+    .clock-center {
+      position: absolute;
+      inset: 22%;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border-radius: 50%;
+      background:
+        radial-gradient(
+          circle at 38% 30%,
+          #fffefa 0%,
+          #faf5ed 62%,
+          #f5ebdf 100%
+        );
+      box-shadow: inset 0 1px 6px rgba(112, 78, 52, 0.07);
+    }
+
+    .time {
+      margin: 0;
+      color: var(--text);
+      font-size: clamp(44px, 13vw, 63px);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.075em;
+      line-height: 0.95;
+    }
+
+    .timer-state {
+      margin-top: 13px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 52px;
+      gap: 9px;
+      margin-bottom: 20px;
+    }
+
+    .button {
+      min-height: 52px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-weight: 800;
+      transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+    }
+
+    .button:active {
+      transform: translateY(0);
+    }
+
+    .start-button {
+      border: 0;
+      background: var(--accent);
+      color: #fffaf5;
+      box-shadow: 0 8px 17px rgba(166, 110, 79, 0.22);
+    }
+
+    .start-button:hover {
+      background: var(--accent-dark);
+      box-shadow: 0 10px 21px rgba(166, 110, 79, 0.27);
+    }
+
+    .reset-button {
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+    }
+
+    .reset-button:hover {
+      background: #ffffff;
+      color: var(--text);
+    }
+
+    .reset-icon {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .sessions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 17px;
+      border-top: 1px solid var(--border);
+    }
+
+    .sessions-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .session-dots {
+      display: flex;
+      gap: 7px;
+    }
+
+    .session-dot {
+      width: 8px;
+      height: 8px;
+      border: 1px solid #cbb8a6;
+      border-radius: 50%;
+      background: transparent;
+    }
+
+    .session-dot.completed {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .session-dot.current {
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .footer {
+      margin-top: 17px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .shortcut,
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    kbd {
+      padding: 2px 6px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--surface);
+      color: var(--accent-dark);
+      font: inherit;
+      font-size: 9px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    @media (max-width: 360px) {
+      .timer-card {
+        padding: 19px;
+        border-radius: 25px;
+      }
+
+      .clock-container {
+        width: min(76vw, 250px);
+      }
+
+      .header {
+        margin-bottom: 17px;
+      }
+
+      .modes {
+        margin-bottom: 18px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <section class="timer-card" aria-label="Pomodoro timer">
+      <header class="header">
+        <div class="brand">
+          <span class="brand-dot" aria-hidden="true"></span>
+          SOFT FOCUS
+        </div>
+
+        <time class="date" id="today" aria-label="Data curentă"></time>
+      </header>
+
+      <nav class="modes" aria-label="Alege modul timerului">
+        <button
+          class="mode"
+          type="button"
+          data-mode="focus"
+          aria-selected="true"
+        >
+          Pomodoro
+        </button>
+
+        <button
+          class="mode"
+          type="button"
+          data-mode="short"
+          aria-selected="false"
+        >
+          Pauză scurtă
+        </button>
+
+        <button
+          class="mode"
+          type="button"
+          data-mode="long"
+          aria-selected="false"
+        >
+          Pauză lungă
+        </button>
+      </nav>
+
+      <div class="clock-container" aria-live="polite">
+        <svg
+          class="progress-ring"
+          viewBox="0 0 100 100"
+          aria-hidden="true"
+        >
+          <circle
+            class="progress-track"
+            cx="50
